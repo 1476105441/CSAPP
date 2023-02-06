@@ -134,7 +134,7 @@
 
 ​	一开始，设当前栈顶指针为y，将 y+12 和 y+8 分别存入到 %rcx 和 %rdx中，肯定也是作为参数使用的，再接着往下看，又将0x4025cf存入 %esi 中，再将 %eax 寄存器清空，最后调用了 sscanf函数，这样的话，我们就明白了，和bomb2中一样，%rcx 和 %rdx中的值是sscanf解析字符串后的结果的存放位置。我们可以看看0x4025cf中存放的内容：
 
-![image-20230130201910221](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230130201910221.png)
+![image-20230130201910221](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230130201910221.png)
 
 ​	说明我们应该输入两个数字。接着往下执行，从ssanf调用回来后，先是校验入参的个数是否合法，然后再比较当前 y（栈顶指针） + 8 位置存储的值和7，如果大于7的话，炸弹就爆炸，所以我们可以知道，输入的第一个参数应该是小于7的，并且由于比较指令使用的是无符号数的比较指令，所以第一个参数的值也要大于等于0。
 
