@@ -36,9 +36,9 @@
 
 2、strings_not_equal函数反汇编代码：
 
-![image-20230111224323115](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230111224323115.png)
+![image-20230111224323115](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230111224323115.png)
 
-![image-20230111224344954](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230111224344954.png)
+![image-20230111224344954](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230111224344954.png)
 
 可以看到，这个函数的汇编代码很多，但是先别慌，我们慢慢来分析。首先，上来先push了一系列寄存器，这是为了保存调用此函数之前寄存器的状态，因为这些寄存器有可能被修改。然后，将两个传参使用的寄存器%rdi和%rsi也保存到两个专用的寄存器中，再接着进入了string_length函数中。
 
@@ -46,7 +46,7 @@
 
 3、string_length函数反汇编代码：
 
-![image-20230111224511021](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230111224511021.png)
+![image-20230111224511021](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230111224511021.png)
 
 进入此函数时，%rdi寄存器的值没有被修改，所以此处存放的还是一开始phase_1调用strings_not_equal传入的第一个参数。那么开始执行这个函数，首先，比较0和***内存地址%rdi处一个字节的值***，如果相等则跳转到倒数第二行代码，否则继续执行。由此可以看出，%rdi存储的是一个地址值，并且是一个字符串（字符数组）的起始地址，这个函数所做的行为就是计算字符串的长度，比较每一个字符是否为0，8-14为循环代码，14-16为比较判断代码。
 
@@ -54,11 +54,11 @@
 
 解析完了string_length函数，我们回到strings_not_equal函数继续执行：
 
-![image-20230111234321334](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230111234321334.png)
+![image-20230111234321334](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230111234321334.png)
 
 可以看到，接下来做的操作是将结果保存到%r12d寄存器中，然后将%rbp（即%rsi）的值赋值给%rdi，接着再次调用string_length函数。这说明了什么？显然，说明了第二个参数也是一个内存地址，且是字符串的起始地址，而追溯其由来，是phase1中传递给%rsi寄存器的0x402400。
 
-![image-20230111234648990](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230111234648990.png)
+![image-20230111234648990](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230111234648990.png)
 
 说明了在这个内存地址处，存放着一个字符串，这个字符串就是第一个炸弹的钥匙。
 
@@ -66,7 +66,7 @@
 
 4、分析到此处，我们已经知道了最关键的信息，答案就在内存地址0x402400处，那么我们怎么要得到这个答案呢？当然做法有很多种，这里我使用了gdb 指令 x/s：
 
-![image-20230111235049433](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230111235049433.png)
+![image-20230111235049433](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230111235049433.png)
 
 这条指令的作用是将内存地址0x402400处的内容以字符串形式打印出来。于是我们就得到了第一个模块的答案。
 
@@ -78,7 +78,7 @@
 
 1、将phase_2反汇编
 
-![Snipaste_2023-01-28_20-52-06](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/Snipaste_2023-01-28_20-52-06.png)
+![Snipaste_2023-01-28_20-52-06](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/Snipaste_2023-01-28_20-52-06.png)
 
 ​	上来进行的一系列操作是将寄存器的值保存起来，然后将栈指针下移40字节，然后将当前的栈顶寄存器的值赋给%rsi寄存器再传递到read_six_numbers函数中，所以接下来进入read_six_numbers一探究竟。
 
@@ -86,25 +86,25 @@
 
 2、将read_six_numbers函数反汇编：
 
-![image-20230129150506361](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230129150506361-16750473334408.png)
+![image-20230129150506361](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230129150506361-16750473334408.png)
 
 ​	通过这个函数名称我们可以猜测这个函数就是解析用户传入参数的，接下来我们一步一步进行验证。首先，一进来就将当前的栈寄存器减了24（为了防止栈缓冲区溢出），然后将%rsi寄存器的值传入%rdx中，%rsi中的值是在phase_2函数中设置的，我们先将它设为y，再接着将%rsi寄存器的值+4赋给%rcx，也就是将y+4存入%rcx中。然后将y+20存入%rax，再将%rax的值存入到当前栈指针地址+8的位置。类似的操作再执行一次，将y+16存入%rax，然后再存到当前栈顶位置。再接下来两个操作分别是将y+12、y+8存入到寄存器%r9、%r8中。可能到这里会让人有些懵，我们先整理一下程序执行到此处时栈内存和寄存器的情况：
 
-![image-20230129151030498](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230129151030498-167504734086611.png)
+![image-20230129151030498](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230129151030498-167504734086611.png)
 
 ​	可以看到，这些寄存器和栈内存中存放的都是地址值，并且是相隔4字节的地址值，一共有6个地址值，并且每个相隔是4字节，由此可以猜测，每个地址存放一个int类型的数字，有没有可能，是要将用户输入的6个数字分别解析然后存入到这6个地址处？接下来证实这个猜想：
 
-![image-20230129151517063](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230129151517063-167504734787314.png)
+![image-20230129151517063](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230129151517063-167504734787314.png)
 
 ​	可以看到，这些寄存器都是用来存放参数的，而前两个寄存器肯定是要用来存放其他参数的，所以还有两个参数就放到栈内存中了。
 
 ​	继续往下走：
 
-![Snipaste_2023-01-29_15-21-26](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/Snipaste_2023-01-29_15-21-26-167504735468817.png)
+![Snipaste_2023-01-29_15-21-26](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/Snipaste_2023-01-29_15-21-26-167504735468817.png)
 
 ​	接下来程序将一个地址存入了%esi 也就是%rsi寄存器的低32位，作为第二个参数，然后清空%eax寄存器，调用sscanf函数，这个函数相信很多人都不陌生，我们可以看一下0x4025c3处的内容：
 
-![image-20230129152509813](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230129152509813-167504736102820.png)
+![image-20230129152509813](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230129152509813-167504736102820.png)
 
 ​	很明显，这是一个字符格式，表示6个数字，注意，用于传递第一个参数的寄存器%rdi没有更改过，所以是进入phase_2时传入的参数，也就是用户输入的内容，到这里，调用sscanf的所有参数都齐了。
 
@@ -114,13 +114,13 @@
 
 3、从read_six_numbers函数中返回，回到phase_2中继续执行
 
-![Snipaste_2023-01-30_14-49-20](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/Snipaste_2023-01-30_14-49-20.png)
+![Snipaste_2023-01-30_14-49-20](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/Snipaste_2023-01-30_14-49-20.png)
 
 ​	一回来的第一个操作就是一条cmpl指令，判断当前栈顶的值是否为1，如果为1，则跳转到箭头所指位置执行。那么当前栈顶的值是在什么时候设置的呢？其实当前栈顶的地址值就是y，也就是在read_six_numbers函数中调用sscanf的时候传递的6个地址参数中的第一个，也就是说，当前栈顶存放的是用户输入的第一个数字（没搞懂的话可以看看上一个步骤），其实也就是判断用户输入的第一个参数是否为1，那么我们就可以确定第一个数字要输入1。
 
 ​	接着往下走，将%rsp + 4 存入到%rbx中，将%rsp + 24 存入到%rbp中，然后又跳转到上面的代码中，从(%rbx-4)内存地址处取出数据存入%eax中，(%rbx-4) 也就是 %rsp，也就是取出栈顶位置存储的值，此时为1，即将1存入%eax中。然后再将%eax的值翻倍，再和%rbx内存地址处的值比较，如果不相等，炸弹爆炸，说明第二个参数的值为2，是前一个参数值的2倍。再接着往下执行，将%rbx+4，和%rbp进行比较，如果不相等，跳转到上面执行，可见这是一个循环，而%rbp存储的值就是循环结束的地址值，往后的参数也和第二个参数计算方式一样，为前一个参数的2倍。至此，我们得到答案为：1 2 4 8 16 32
 
-![image-20230130174217221](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230130174217221.png)
+![image-20230130174217221](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230130174217221.png)
 
 
 
@@ -130,7 +130,7 @@
 
 1、反汇编phase_3：
 
-![Snipaste_2023-01-30_17-47-21](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/Snipaste_2023-01-30_17-47-21.png)
+![Snipaste_2023-01-30_17-47-21](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/Snipaste_2023-01-30_17-47-21.png)
 
 ​	一开始，设当前栈顶指针为y，将 y+12 和 y+8 分别存入到 %rcx 和 %rdx中，肯定也是作为参数使用的，再接着往下看，又将0x4025cf存入 %esi 中，再将 %eax 寄存器清空，最后调用了 sscanf函数，这样的话，我们就明白了，和bomb2中一样，%rcx 和 %rdx中的值是sscanf解析字符串后的结果的存放位置。我们可以看看0x4025cf中存放的内容：
 
@@ -140,15 +140,15 @@
 
 ​	再接着往下：
 
-![image-20230130203825831](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230130203825831.png)
+![image-20230130203825831](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230130203825831.png)
 
 ​	这里将第一个参数值存入到 %eax 中，然后跳转到另一个地址去执行，通过这个跳转方式可以推测 0x402470 是一个函数表的首地址，根据第一个参数传递的值的不同，跳转到不同的位置执行。那么现在我们怎么知道会跳转到哪里呢？我的方法是设置断点，然后单步执行程序：
 
-![image-20230130204846492](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230130204846492.png)
+![image-20230130204846492](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230130204846492.png)
 
 ​	最终会来到phase_3函数中的这里执行，可以看到这里会将 0x137 和 y + 12 进行比较，如果不相等，炸弹爆炸。所以我们就得到了bomb3的其中一个答案 ：1 311
 
-![image-20230130205410669](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230130205410669.png)
+![image-20230130205410669](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230130205410669.png)
 
 ​	以此类推，这个炸弹共有8个解决方案，感兴趣的可以按照这个方法找出其他参数对应的答案。
 
@@ -158,11 +158,11 @@
 
 1、反汇编phase_4：
 
-![image-20230201205628532](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230201205628532.png)
+![image-20230201205628532](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230201205628532.png)
 
 ​	和前几题一样，又是熟悉的sscanf，而且调用之前设置了两个内存地址作为参数，盲猜此步骤需要输入两个整数：
 
-![image-20230201212423652](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230201212423652.png)
+![image-20230201212423652](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230201212423652.png)
 
 ​	果然是这样，继续往下走，做了校验参数的个数，如果不为2则炸弹爆炸。接着再比较第一个参数和14的大小，如果大于14，则直接引爆炸弹。接着，将14赋值给%edx，0赋值给%esi，第一个参数值赋值给%edi，然后调用func4。
 
@@ -170,7 +170,7 @@
 
 2、反汇编func4：
 
-![image-20230201214529650](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230201214529650.png)
+![image-20230201214529650](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230201214529650.png)
 
 ​	整个题目的精髓就在这里，由于描述起来比较复杂，我就直接把我观察出来的结论说出来：这是一个二分查找的汇编代码！%rdx中存放的是二分查找右边界的值，%rsi中存放的是左边界的值，%rdi存放的是第一个参数（设为x）的值，这个二分查找算法就是从右边界r = 14，左边界 l = 0 开始，查找x的值。认真阅读代码就能发现，只有当x = 1、3、7的时候返回值为0。
 
@@ -178,7 +178,7 @@
 
 3、回到phase_4：
 
-![image-20230201215552909](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230201215552909.png)
+![image-20230201215552909](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230201215552909.png)
 
 ​	可以看到，从func4返回后，先测试%eax是否为0，不为0则炸弹爆炸，所以可以得到第一个参数的值为1、3、7。接着，将第二个参数和0比较，不相等则炸弹爆炸，所以第二个参数值为0。
 
@@ -188,13 +188,13 @@
 
 1、反汇编phase_5：
 
-![image-20230201223747350](D:\Project\project_revelant\CSAPP\bomb\笔记.assets\image-20230201223747350.png)
+![image-20230201223747350](D:\Project\project_revelant\CSAPP\bomb\readme.assets\image-20230201223747350.png)
 
 
 
 最终结果：
 
-![image-20230201233450769](D:\Project\project_revelant\CSAPP\bomb\笔记.assets\image-20230201233450769.png)
+![image-20230201233450769](D:\Project\project_revelant\CSAPP\bomb\readme.assets\image-20230201233450769.png)
 
 
 
@@ -310,10 +310,10 @@ Dump of assembler code for function phase_6:
    0x0000000000401203 <+271>:	retq 
 ~~~
 
-![Snipaste_2023-02-04_00-21-58](D:\Project\project_revelant\CSAPP\bomb\笔记.assets\Snipaste_2023-02-04_00-21-58.png)
+![Snipaste_2023-02-04_00-21-58](D:\Project\project_revelant\CSAPP\bomb\readme.assets\Snipaste_2023-02-04_00-21-58.png)
 
 
 
 答案为：4 3 2 1 6 5
 
-![image-20230206235420600](D:\Project\project_revelant\CSAPP\bomb\笔记.assets\image-20230206235420600.png)
+![image-20230206235420600](D:\Project\project_revelant\CSAPP\bomb\readme.assets\image-20230206235420600.png)
