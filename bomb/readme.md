@@ -26,7 +26,7 @@
 
 1、使用gdb反汇编phase_1，可以看到关键信息
 
-![image-20230111222252901](https://gitee.com/wang-junshen/csapp/raw/master/bomb/%E7%AC%94%E8%AE%B0.assets/image-20230111222252901.png)
+![image-20230111222252901](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230111222252901.png)
 
 首先，将栈指针减8字节，开辟出一段栈空间（另作他用？），然后将立即数 0x402400 存入到寄存器 %esi，这个寄存器是用于存放第二个参数的，也就是说立即数 0x402400是接下来调用函数的第二个参数，再接着，调用strings_not_equal函数，顾名思义，此函数是用来判断两个字符串是否相等的，那么在这里，我们可以猜测输入的是一个字符串。
 
