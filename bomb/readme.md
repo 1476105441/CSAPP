@@ -188,13 +188,13 @@
 
 1、反汇编phase_5：
 
-![image-20230201223747350](D:\Project\project_revelant\CSAPP\bomb\readme.assets\image-20230201223747350.png)
+![image-20230201223747350](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230201223747350.png)
 
 
 
 最终结果：
 
-![image-20230201233450769](D:\Project\project_revelant\CSAPP\bomb\readme.assets\image-20230201233450769.png)
+![image-20230201233450769](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230201233450769.png)
 
 
 
@@ -310,10 +310,10 @@ Dump of assembler code for function phase_6:
    0x0000000000401203 <+271>:	retq 
 ~~~
 
-![Snipaste_2023-02-04_00-21-58](D:\Project\project_revelant\CSAPP\bomb\readme.assets\Snipaste_2023-02-04_00-21-58.png)
+![Snipaste_2023-02-04_00-21-58](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/Snipaste_2023-02-04_00-21-58.png)
 
 
 
 答案为：4 3 2 1 6 5
 
-![image-20230206235420600](D:\Project\project_revelant\CSAPP\bomb\readme.assets\image-20230206235420600.png)
+![image-20230206235420600](https://gitee.com/wang-junshen/csapp/raw/master/bomb/readme.assets/image-20230206235420600.png)
