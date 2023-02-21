@@ -4,4 +4,15 @@
 
 ​	文件说明：***ctarget***、***rtarget***为我们要攻击的源程序，***hex2raw***是帮助我们将16进制表示转换为字符的程序，***farm.c***也是一个工具程序，***cookie.txt***是用户的cookie值，用于向cmu的服务器发起请求的，***ctarget.txt***是反编译输出的ctaget代码。
 
-​	
+
+
+# Part I: Code Injection Attacks
+
+​	第一部分，代码注入攻击
+
+## Level 1
+
+​	查看attack的实验指导（本项目中实验指导目录下的attacklab.pdf文档）可以知道，第一个实验要求我们利用栈缓冲区溢出来执行特定的目标代码touch1。
+
+​	我们只需要将栈内存中当前函数的返回地址修改为目标函数的开始地址就可以完成。
+
